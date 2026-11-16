@@ -1,0 +1,772 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pichanga 11 Stats</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="color-scheme" content="light">
+<style>
+/* Layout: red club band on top, then one column of sections ordered by relevance; boards in an auto grid. */
+:root{
+  --bg:#f6f4f1; --card:#ffffff; --ink:#17140f; --muted:#6d665c; --line:#e6e1d9;
+  --red:#c8102e; --red-soft:#f9e3e6; --bar:#c8102e; --ok:#1d7a46; --band-ink:#ffffff;
+  --hi:#1f7a4a; --hi-bg:#e3f3ea; --mid:#9a6200; --mid-bg:#fbefd9; --lo:#a3361b; --lo-bg:#f9e4dd; --none:#6d665c; --none-bg:#ecebea;
+  --travel:#1d4f91; --travel-bg:#e3eefc; --away:#7aa7e0;
+  color-scheme:light;  /* Light only: Oscar does not want a dark version. */
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--red);color:var(--band-ink);padding-block:20px 16px}
+header > div{max-width:980px;margin:0 auto}
+header h1{margin:0;font-size:22px;letter-spacing:-.3px}
+header p{margin:4px 0 0;opacity:.85;font-size:13px}
+main{max-width:980px;margin:0 auto;padding-block:16px}
+.tabs{display:flex;gap:6px;margin:0 0 16px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:999px;font:inherit;font-size:13px;cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tabs button:focus-visible,.more:focus-visible,.row:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--muted)}
+.sec{margin:26px 0 10px;display:flex;flex-direction:column;gap:2px}
+.sec h2{font-size:15px;margin:0;text-transform:uppercase;letter-spacing:.6px}
+.sec p{margin:0;font-size:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.card h3{margin:0;font-size:16px}
+.card .sub{margin:2px 0 4px;font-size:12px;color:var(--muted)}
+.card .why{margin:0 0 10px;font-size:12px;color:var(--lo)}
+.card .why.mid{color:var(--mid)}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:999px;white-space:nowrap;flex:none}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.t-hi{color:var(--hi);background:var(--hi-bg)} .t-mid{color:var(--mid);background:var(--mid-bg)}
+.t-lo{color:var(--lo);background:var(--lo-bg)} .t-none{color:var(--none);background:var(--none-bg)}
+.row{display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center;padding:4px 0;cursor:pointer}
+.row .n{color:var(--muted);font-size:12px;text-align:right}
+.row .who{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.row .bar{height:4px;background:var(--bar);border-radius:2px;margin-top:3px;opacity:.85}
+.row .v{font-variant-numeric:tabular-nums;font-weight:600}
+.row:first-of-type .who{font-weight:700}
+.more{margin-top:6px;background:none;border:0;color:var(--red);font:inherit;font-size:13px;cursor:pointer;padding:0}
+.out{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--line);cursor:pointer;flex-wrap:wrap}
+.out:first-of-type{border-top:0}
+.tag{font-size:11px;padding:2px 7px;border-radius:999px;background:var(--red-soft);color:var(--red);white-space:nowrap}
+.tag.travel{background:var(--travel-bg);color:var(--travel)}
+.muted{color:var(--muted);font-size:13px}
+.ev{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.ev:first-of-type{border-top:0}
+.soon{border-style:dashed}
+dialog{border:0;border-radius:16px;padding:0;max-width:440px;width:calc(100% - 32px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.sheet{padding:18px}
+.sheet h3{margin:0 0 4px;font-size:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.stats div{background:var(--bg);border-radius:10px;padding:8px}
+.stats b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.stats span{font-size:11px;color:var(--muted)}
+.dots{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0 12px}
+.dots i{width:12px;height:12px;border-radius:3px;background:var(--line)}
+.dots i.y{background:var(--ok)}
+.dots i.a{background:var(--away)}
+.close{float:right;background:none;border:0;font-size:22px;color:var(--muted);cursor:pointer}
+footer{margin:28px 0 8px;font-size:12px;color:var(--muted);text-align:center}
+.season{margin:-6px 0 14px;font-size:14px;font-weight:600}
+.tstats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 16px;margin-bottom:14px}
+.tstats div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.tstats b{font-size:20px;font-variant-numeric:tabular-nums}
+.tstats span{font-size:12px;color:var(--muted)}
+.chart-box{overflow-x:auto;position:relative}
+.chart-box svg{display:block;width:100%;min-width:480px;height:auto}
+.chart-box text{fill:var(--muted);font-size:11px;font-family:inherit}
+.chart-box .grid-l{stroke:var(--line);stroke-width:1}
+.chart-box .avg-l{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 4;opacity:.6}
+.chart-box .bar-m{fill:var(--bar)}
+.chart-box .hit{fill:transparent;cursor:default}
+.chart-box .hit:hover + .bar-m,.chart-box .bar-m.on{opacity:.65}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:5px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-100%);margin-top:-6px}
+@media (max-width:600px){.kpis{grid-template-columns:repeat(2,1fr)} .tstats{grid-template-columns:repeat(2,1fr)}}
+/* Team part (editable) */
+.me{margin-top:10px;font-size:13px;display:flex;align-items:center;gap:6px}
+[hidden]{display:none!important}
+.me select{font:inherit;font-size:13px;border-radius:8px;border:0;padding:3px 6px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:13px;padding:6px 11px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.btn.main{background:var(--red);border-color:var(--red);color:#fff}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.sec.sec-row{flex-direction:row;justify-content:space-between;align-items:flex-end;gap:8px}
+.match{margin-bottom:12px}
+.match h3{font-size:17px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.grp{margin:8px 0 0}
+.grp > span{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:4px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:13px;padding:3px 9px;border-radius:999px;cursor:pointer}
+.chip.yes{background:var(--hi-bg);border-color:transparent;color:var(--hi)}
+.chip.maybe{background:var(--mid-bg);border-color:transparent;color:var(--mid)}
+.chip.no{background:var(--lo-bg);border-color:transparent;color:var(--lo)}
+.chip.sel{outline:2px solid var(--ink);outline-offset:1px}
+.chip.off{opacity:.55}
+.answer{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+.answer select,.form input,.form select{font:inherit;font-size:14px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:0}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.form label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.form .full{grid-column:1/-1}
+.form .acts{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end}
+.form .chk{flex-direction:row;align-items:center;gap:6px;font-size:14px;color:var(--ink)}
+.del{background:none;border:0;color:var(--muted);cursor:pointer;font-size:15px;padding:0 2px}
+.pl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.pl button{display:flex;gap:6px;align-items:baseline;text-align:left;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:7px 9px;font:inherit;font-size:14px;cursor:pointer;min-width:0}
+.pl button small{color:var(--muted);font-size:11px;margin-left:auto;white-space:nowrap}
+.pl button span{min-width:0;overflow:hidden}
+.pl button i,.nick{display:block;font-style:normal;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.out .nick{display:inline}
+.aka{color:var(--muted);font-size:14px;margin:-2px 0 4px}
+.pl button b{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600;font-size:12px;min-width:18px}
+.gate{max-width:360px;margin:40px auto}
+.gate input{width:100%;font:inherit;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin:10px 0}
+.err{color:var(--lo);font-size:13px;min-height:1em}
+.divider{margin:40px 0 0;padding-top:18px;border-top:2px solid var(--line)}
+.divider h2{margin:0;font-size:18px}
+/* Calendar: one row per person who is away, one bar per away period (8 weeks across the card) */
+.tl{margin-top:10px;font-size:12px}
+.tl-row{display:grid;grid-template-columns:104px 1fr;align-items:center;min-height:30px;border-top:1px solid var(--line)}
+.tl-row.head{border-top:0;min-height:34px;align-items:end}
+.tl-name{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px;cursor:pointer}
+.tl-name small{display:block;font-weight:400;color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis}
+.tl-track{position:relative;height:30px;background:repeating-linear-gradient(to right,var(--line) 0 1px,transparent 1px calc(100%/8))}
+.head .tl-track{background:none;height:34px}
+.tl-md{position:absolute;top:0;bottom:0;background:var(--hi-bg)}
+.tl-now{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.5}
+.tl-wk{position:absolute;bottom:2px;color:var(--muted);white-space:nowrap}
+.tl-ball{position:absolute;top:0;transform:translateX(-50%);text-align:center;line-height:1.1;font-size:11px;color:var(--hi);font-weight:700}
+.tl-bar{position:absolute;height:16px;border-radius:8px;color:#fff;font-size:11px;line-height:16px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.tl-bar.cut-l{border-top-left-radius:0;border-bottom-left-radius:0}
+.tl-bar.cut-r{border-top-right-radius:0;border-bottom-right-radius:0}
+.tl-bar.open{-webkit-mask-image:linear-gradient(to right,#000 75%,transparent);mask-image:linear-gradient(to right,#000 75%,transparent)}
+.tl-bar.k-travel{background:var(--travel)} .tl-bar.k-injury,.tl-bar.k-sick{background:var(--lo)} .tl-bar.k-other{background:var(--red)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.pos-tag{font-size:11px;font-weight:700;padding:1px 6px;border-radius:999px;background:var(--bg);color:var(--muted)}
+.big-pos{font-size:15px;font-weight:600;margin:2px 0 6px}
+.pgrp{margin-bottom:12px} .pgrp h4{margin:0 0 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.poschk{display:flex;flex-wrap:wrap;gap:6px}
+.poschk label{flex-direction:row;align-items:center;gap:4px;font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.ro{background:var(--mid-bg);color:var(--mid);font-size:13px;padding:8px 12px;border-radius:10px;margin-bottom:12px}
+</style>
+
+<header class="pad"><div>
+  <h1>Pichanga 11 · the chat, counted</h1>
+  <p id="updated">Built from the WhatsApp group lists.</p>
+  <label class="me" id="me-box" hidden>I am <select id="me"></select></label>
+</div></header>
+<main class="pad">
+  <div class="card gate" id="gate" hidden>
+    <h3>Team password</h3>
+    <p class="muted">Ask in the WhatsApp group. You only type it once on this phone.</p>
+    <form id="gate-form"><input id="pass" type="password" autocomplete="current-password" placeholder="Password"><button class="btn main">Open</button></form>
+    <p class="err" id="gate-err"></p>
+  </div>
+  <div id="app" hidden>
+  <div class="ro" id="ro" hidden>Preview only. Open the team link to edit.</div>
+
+  <div class="sec sec-row"><div><h2>Next matches</h2><p>Say if you can play. People who are away count as out.</p></div><button class="btn sm" data-act="match-new">+ Add match</button></div>
+  <div id="matches"></div>
+
+  <div class="sec sec-row"><div><h2>Who's out</h2><p>Travel, injuries, anything. Anyone can add or remove a line.</p></div><button class="btn sm" data-act="away-new">+ I'm away</button></div>
+  <div class="card" id="outnow"></div>
+
+  <div class="sec sec-row"><div><h2>Calendar</h2><p>Only people who are away. ⚽ = match day, number = players free.</p></div>
+    <span style="white-space:nowrap"><button class="btn sm" data-cal="-1" aria-label="Earlier">◀</button> <button class="btn sm" data-cal="0">Today</button> <button class="btn sm" data-cal="1" aria-label="Later">▶</button></span></div>
+  <div class="card">
+    <div class="legend"><span><i style="background:var(--travel)"></i>travel</span><span><i style="background:var(--lo)"></i>injured / sick</span><span><i style="background:var(--red)"></i>away</span><span>Faded end = no return date</span></div>
+    <div class="tl" id="cal"></div>
+  </div>
+
+  <div class="sec sec-row"><div><h2>Players</h2><p>Tap a name to see stats and edit the profile.</p></div><button class="btn sm" data-act="player-new">+ Add player</button></div>
+  <div class="card" id="players"></div>
+
+  <div class="divider"><h2>The chat, counted</h2><p class="muted">Stats from the WhatsApp lists and messages.</p></div>
+  <div class="tabs" id="tabs" style="margin-top:14px"></div>
+  <p class="season" id="season-note"></p>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="sec"><h2>Trainings</h2><p>Each bar is one training: how many names were on the final list.</p></div>
+  <div class="card">
+    <div class="tstats" id="tstats"></div>
+    <div class="chart-box" id="tchart"></div>
+  </div>
+
+  <div class="sec"><h2>Matters most</h2><p>Who shows up, who commits, who pays.</p></div>
+  <div class="grid" id="b-high"></div>
+
+  <div class="sec"><h2>Fun facts</h2><p>Habits on and around the list.</p></div>
+  <div class="grid" id="b-mid"></div>
+
+  <div class="sec"><h2>In the chat</h2><p>How people talk in the group. List copy-pastes are not counted.</p></div>
+  <div class="grid" id="b-chat"></div>
+
+
+  <div class="sec"><h2>Last lists</h2></div>
+  <div class="card" id="recent"></div>
+
+  <footer>Counts come from the final version of each list in the chat. Trust labels say how close a number is to what really happened.</footer>
+  </div>
+</main>
+<dialog id="dlg"><div class="sheet" id="sheet"></div></dialog>
+
+<script>
+const TODAY = new Date().toISOString().slice(0,10);
+const PERIODS = [
+  {id:'s27', label:'Season 26/27', from:'2026-08-01', to:'2027-07-31'},
+  {id:'all', label:'All time', from:'0000', to:'9999'},
+];
+const TRUST = {hi:'High trust', mid:'Medium trust', lo:'Low trust', none:'No data'};
+let EVENTS=[], ABS=[], CHAT=[], period=PERIODS[0];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = d => d ? new Date(d+'T12:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '?';
+const daysBetween = (a,b) => Math.round((new Date(b)-new Date(a))/864e5);
+const pill = t => `<span class="pill t-${t}">${TRUST[t]}</span>`;
+
+// Team data lives in Supabase. The anon key is public by design: the tables are closed,
+// and both functions ask for the team password.
+const SUPA = 'https://sxfbzcnsbcvitaenwpct.supabase.co/rest/v1/rpc/';
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4ZmJ6Y25zYmN2aXRhZW53cGN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkxNTUzODksImV4cCI6MjEwNDczMTM4OX0.AwTQ4lNfFQXEOWUcgOcyI3QUxsYP7-GFo7zuPkHuOJM';
+const LS = { get: k => { try { return localStorage.getItem(k) || ''; } catch { return ''; } },
+             set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+let LAST = {}, LIVE = {players:[], away:[], matches:[], availability:[]}, MODE = 'live', PASS = LS.get('pichanga-pass'), ME = LS.get('pichanga-me');
+const coll = (a,b) => a.localeCompare(b, 'es', {sensitivity:'base'});
+
+async function rpc(fn, body){
+  const r = await fetch(SUPA + fn, {method:'POST', body: JSON.stringify(body),
+    headers:{apikey:ANON, Authorization:'Bearer '+ANON, 'Content-Type':'application/json'}});
+  return r.json();
+}
+
+function useData(d){
+  EVENTS = d.stats?.events || []; CHAT = d.stats?.chat || {};
+  LIVE = {players:d.players||[], away:d.away||[], matches:d.matches||[], availability:d.availability||[]};
+  LAST = {}; for (const e of EVENTS) for (const p of e.players) if (!(LAST[p.player] >= e.date)) LAST[p.player] = e.date;
+  // Stats boards: chat absences + the ones people typed in the app (chat copies are skipped).
+  ABS = (d.stats?.absences || []).concat(LIVE.away.filter(a => a.created_by!=='chat'));
+}
+
+async function load(){
+  let d = null;
+  try { d = await rpc('pichanga_get', {pass: PASS}); }
+  catch { d = null; }
+  if (d && !d.ok){ showGate(PASS ? 'Wrong password. Try again.' : ''); return; }
+  if (d){ MODE = 'live'; useData(d); }
+  else {
+    // No access to Supabase (preview inside Claude): read the files next to the page.
+    MODE = 'ro';
+    const get = async (u, dflt) => { try { const r = await fetch(u); return r.ok ? r.json() : dflt; } catch { return dflt; } };
+    const [events, absences, chat, live] = await Promise.all([get('data/events.json',[]), get('data/absences.json',[]), get('data/chat_stats.json',{}), get('data/live.json',{})]);
+    useData({...live, stats:{events, absences, chat}});
+  }
+  start();
+}
+
+function showGate(msg){
+  $('#gate').hidden = false; $('#app').hidden = true; $('#gate-err').textContent = msg; $('#pass').focus();
+}
+
+let started = false;
+function start(){
+  $('#gate').hidden = true; $('#app').hidden = false; $('#ro').hidden = MODE==='live';
+  const last = EVENTS.at(-1);
+  if (last) $('#updated').textContent = `Chat stats from ${EVENTS.length} WhatsApp lists · last one ${fmt(last.date)}`;
+  if (!started){
+    started = true;
+    $('#tabs').innerHTML = PERIODS.map(p => `<button id="tab-${p.id}" data-id="${p.id}">${p.label}</button>`).join('');
+    $('#tabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; period = PERIODS.find(p => p.id===b.dataset.id); render(); };
+    $('#me').onchange = e => { ME = e.target.value; LS.set('pichanga-me', ME); renderTeam(); };
+  }
+  $('#me-box').hidden = !LIVE.players.length;
+  $('#me').innerHTML = `<option value="">pick your name</option>` + names().map(n => `<option value="${esc(n)}" ${n===ME?'selected':''}>${esc(withNick(n))}</option>`).join('');
+  render();
+}
+
+async function refresh(){
+  const d = await rpc('pichanga_get', {pass: PASS});
+  if (d.ok){ useData(d); start(); }
+}
+
+async function save(body){
+  if (MODE !== 'live'){ alert('This is a preview. Open the team link to edit.'); return false; }
+  try {
+    const r = await rpc('pichanga_save', {pass: PASS, body: {...body, by: ME}});
+    if (!r.ok){ alert('Not saved: ' + r.error); return false; }
+  } catch { alert('Not saved: no connection.'); return false; }
+  await refresh();
+  return true;
+}
+
+// ---------------------------------------------------------------- team part
+const names = () => [...LIVE.players].sort((a,b) => (b.active-a.active) || coll(a.name,b.name)).map(p => p.name);
+const opts = sel => names().map(n => `<option value="${esc(n)}" ${n===sel?'selected':''}>${esc(withNick(n))}</option>`).join('');
+// Nicknames: one text field, comma between them.
+const nicks = p => (p?.nickname || '').split(',').map(x => x.trim()).filter(Boolean);
+const chipName = n => { const k = nicks(LIVE.players.find(p => p.name===n))[0]; return esc(n) + (k ? ` <small class="muted" style="font-size:11px">${esc(k)}</small>` : ''); };
+const withNick = n => { const k = nicks(LIVE.players.find(p => p.name===n))[0]; return k ? `${n} (${k})` : n; };
+const WDL = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const KIND = {travel:['✈️','travel'], injury:['🩹','injured'], sick:['🤒','sick'], other:['📌','away']};
+const addDays = (d, n) => new Date(new Date(d+'T12:00').getTime() + n*864e5).toISOString().slice(0,10);
+// Open-ended injury or sickness: count the person out for 6 weeks after the start.
+const awayOn = (n, d) => LIVE.away.find(a => a.player===n && a.start<=d && (a.end ? a.end>=d : a.kind!=='travel' && d<=addDays(a.start, 42)));
+const isPlayer = p => p.active && p.role !== 'coach';
+const showNote = a => a.note && (a.kind==='travel' || a.kind==='other');
+
+const POS = {GK:'Goalkeeper', DEF:'Defender', MID:'Midfielder', FWD:'Forward'};
+const posList = p => (p?.position || '').split(' ').filter(Boolean);
+const posText = p => { const [m, ...o] = posList(p); return m ? POS[m] + (o.length ? ' · also ' + o.map(x => POS[x].toLowerCase()).join(', ') : '') : ''; };
+let allMatches = false;
+
+function renderTeam(){
+  // Matches: the next 3, the rest behind a button
+  const up = LIVE.matches.filter(m => m.match_date >= TODAY);
+  const shown = allMatches ? up : up.slice(0, 3);
+  $('#matches').innerHTML = (up.length ? shown.map(matchHTML).join('')
+    : '<div class="card muted">No matches yet. Tap "+ Add match" for the next one.</div>')
+    + (up.length > 3 ? `<button class="more" data-all-matches>${allMatches ? 'Show fewer matches' : `Show all ${up.length} matches`}</button>` : '');
+
+  // Who's out: running now, or starting later. Old open-ended lines (60+ days) are hidden.
+  const gone = new Set(LIVE.players.filter(p => !p.active).map(p => p.name));
+  const out = LIVE.away.filter(a => !gone.has(a.player) && (a.end ? a.end >= TODAY : daysBetween(a.start, TODAY) <= 60))
+    .sort((a,b) => a.start < b.start ? -1 : 1);
+  $('#outnow').innerHTML = out.length ? out.map(a => {
+    const [ic, word] = KIND[a.kind] || KIND.other;
+    const when = a.start > TODAY ? `${fmt(a.start)} – ${a.end ? fmt(a.end) : '?'}` : a.end ? `back ${fmt(a.end)}` : `since ${fmt(a.start)}, no return date`;
+    const src = {chat:' <span class="muted">· from chat</span>', calendar:' <span class="muted">· from calendar sheet</span>'}[a.created_by] || '';
+    const nk = nicks(LIVE.players.find(p => p.name===a.player))[0];
+    return `<div class="out"><span><b>${esc(a.player)}</b>${nk ? ` <span class="nick">(${esc(nk)})</span>` : ''} ${showNote(a) ? `<span class="muted">${esc(a.note)}</span>` : ''}${src}</span>
+      <span><span class="tag ${a.kind==='travel'?'travel':''}">${ic} ${word}</span> <span class="muted">${when}</span>
+      <button class="del" data-away-del="${a.id}" aria-label="Remove ${esc(a.player)}">✕</button></span></div>`;
+  }).join('') : '<span class="muted">Nobody is out. Going away? Tap "+ I\'m away".</span>';
+
+  // Players, grouped by main position. Coaches and not-active people get their own groups.
+  const all = [...LIVE.players].sort((a,b) => coll(a.name,b.name));
+  const ps = all.filter(isPlayer);
+  const btn = p => {
+    const aw = awayOn(p.name, TODAY), also = posList(p).slice(1).join(' ');
+    const ls = !p.active && LAST[p.name] ? 'last list '+fmt(LAST[p.name]) : '';
+    return `<button data-p="${esc(p.name)}" style="${p.active?'':'opacity:.6'}"><b>${p.number ?? ''}</b><span>${esc(p.name)}${nicks(p).length ? `<i>${esc(nicks(p).join(', '))}</i>` : ''}</span><small>${also ? 'also '+also : ls}${aw && p.active ? ' '+(KIND[aw.kind]||KIND.other)[0] : ''}</small></button>`;
+  };
+  const off = all.filter(p => !p.active);
+  const groups = [...Object.entries(POS).map(([k, label]) => [label + 's', ps.filter(p => posList(p)[0]===k)]),
+                  ['No position yet: tap your name and add it', ps.filter(p => !posList(p).length)],
+                  ['Coach', all.filter(p => p.active && p.role==='coach')]];
+  $('#players').innerHTML = staleHTML() + (groups.filter(([, list]) => list.length)
+    .map(([t, list]) => `<div class="pgrp"><h4>${t} · ${list.length}</h4><div class="pl">${list.map(btn).join('')}</div></div>`).join('')
+    || '<span class="muted">No players yet.</span>')
+    + (off.length ? `<button class="more" data-show-off>${showOff ? 'Hide' : 'Show'} ${off.length} not active</button>`
+      + (showOff ? `<div class="pgrp" style="margin-top:8px"><h4>Not active · ${off.length}</h4><div class="pl">${off.map(btn).join('')}</div></div>` : '') : '');
+  renderCal();
+}
+
+// Players still marked active, but not on any list for 6+ weeks (and not away with a return date).
+let showOff = false;
+function staleHTML(){
+  if (MODE !== 'live') return '';
+  const cut = addDays(TODAY, -42);
+  const stale = LIVE.players.filter(p => isPlayer(p) && (LAST[p.name] || '') < cut
+    && !LIVE.away.some(a => a.player===p.name && a.end && a.end >= TODAY && a.start <= TODAY));
+  if (!stale.length) return '';
+  return `<div class="pgrp" style="background:var(--mid-bg);border-radius:10px;padding:10px 12px">
+    <h4 style="color:var(--mid)">Not seen for 6+ weeks · ${stale.length}</h4>
+    <p class="muted" style="margin:0 0 8px">Not on any list since the date shown. Untick anyone who still plays, then mark the rest not active. Not active = hidden from matches and the calendar. You can undo it in their profile.</p>
+    <form id="stale"><div class="poschk">${stale.map(p => `<label><input type="checkbox" name="n" value="${esc(p.name)}" checked> ${esc(p.name)} <span class="muted">${LAST[p.name] ? fmt(LAST[p.name]) + (LAST[p.name].slice(0,4) !== TODAY.slice(0,4) ? ' '+LAST[p.name].slice(0,4) : '') : 'never'}</span></label>`).join('')}</div>
+    <div style="margin-top:10px"><button class="btn main">Mark ticked as not active</button></div></form></div>`;
+}
+
+// Calendar: 8 weeks from calStart (a Monday). Only people with away time in the window.
+const mondayOf = d => addDays(d, -((new Date(d+'T12:00').getDay()+6) % 7));
+let calStart = mondayOf(TODAY);
+function renderCal(){
+  const N = 56, end = addDays(calStart, N - 1);
+  const pct = d => (daysBetween(calStart, d) / N * 100).toFixed(3) + '%';
+  const active = LIVE.players.filter(isPlayer).map(p => p.name);
+  const said = (m, n) => LIVE.availability.find(v => v.match_id===m.id && v.player===n)?.status;
+  const matches = LIVE.matches.filter(m => m.match_date >= calStart && m.match_date <= end);
+  const md = matches.map(m => `<div class="tl-md" style="left:${pct(m.match_date)};width:${(100/N).toFixed(3)}%"></div>`).join('');
+  const now = TODAY >= calStart && TODAY <= end ? `<div class="tl-now" style="left:calc(${pct(TODAY)} + ${(50/N).toFixed(3)}%)"></div>` : '';
+  // Open-ended injuries show 6 weeks, like awayOn().
+  const shownEnd = a => a.end || (a.kind==='travel' ? a.start : addDays(a.start, 42));
+  const bars = {};
+  for (const a of LIVE.away){
+    if (!active.includes(a.player)) continue;
+    const e = shownEnd(a);
+    if (e < calStart || a.start > end) continue;
+    (bars[a.player] ||= []).push(a);
+  }
+  const rows = Object.entries(bars).sort((x, y) => (x[1][0].start < y[1][0].start ? -1 : 1));
+  let h = `<div class="tl-row head"><span></span><div class="tl-track">${md}${now}`;
+  for (let i = 0; i < N; i += 14) h += `<span class="tl-wk" style="left:calc(${pct(addDays(calStart, i))} + 3px)">${fmt(addDays(calStart, i))}</span>`;
+  for (const m of matches){
+    const free = active.filter(n => !awayOn(n, m.match_date) && said(m, n)!=='no').length;
+    h += `<span class="tl-ball" style="left:calc(${pct(m.match_date)} + ${(50/N).toFixed(3)}%)" title="vs ${esc(m.opponent)} · ${free} free">⚽<br>${free}</span>`;
+  }
+  h += '</div></div>';
+  for (const [n, list] of rows){
+    const nick = nicks(LIVE.players.find(p => p.name===n))[0];
+    // Overlapping periods go on separate lines inside the row.
+    list.sort((x, y) => x.start < y.start ? -1 : 1);
+    const lanes = [], lane = new Map();
+    for (const a of list){ let i = lanes.findIndex(e => e < a.start); if (i < 0) i = lanes.push('') - 1; lanes[i] = shownEnd(a); lane.set(a, i); }
+    h += `<div class="tl-row"><span class="tl-name" data-p="${esc(n)}">${esc(n)}${nick ? `<small>${esc(nick)}</small>` : ''}</span><div class="tl-track" style="height:${10 + lanes.length*20}px">${md}${now}`;
+    for (const a of list){
+      const s = a.start < calStart ? calStart : a.start, e0 = shownEnd(a), e = e0 > end ? end : e0;
+      const [ic, word] = KIND[a.kind] || KIND.other;
+      const label = a.end ? `${word} · until ${fmt(a.end)}` : `${word} · since ${fmt(a.start)}`;
+      const cls = ['tl-bar', 'k-'+a.kind, a.start < calStart ? 'cut-l' : '', e0 > end ? 'cut-r' : '', a.end ? '' : 'open'].join(' ');
+      h += `<span class="${cls}" data-p="${esc(n)}" style="top:${5 + lane.get(a)*20}px;left:${pct(s)};width:${((daysBetween(s, e) + 1) / N * 100).toFixed(3)}%" title="${esc(n)}: ${esc(label)}">${daysBetween(s, e) >= 10 ? esc(label) : ''}</span>`;
+    }
+    h += '</div></div>';
+  }
+  if (!rows.length) h += '<p class="muted" style="margin:10px 0 0">Nobody is away in these 8 weeks.</p>';
+  $('#cal').innerHTML = h;
+}
+
+function matchHTML(m){
+  const av = Object.fromEntries(LIVE.availability.filter(v => v.match_id===m.id).map(v => [v.player, v.status]));
+  const active = LIVE.players.filter(isPlayer).map(p => p.name);
+  const g = {yes:[], maybe:[], no:[], none:[]};
+  for (const n of [...new Set([...active, ...Object.keys(av)])].sort(coll)){
+    if (av[n]) g[av[n]].push(`<button class="chip ${av[n]}" data-pick="${m.id}" data-n="${esc(n)}">${chipName(n)}</button>`);
+    else {
+      const a = awayOn(n, m.match_date);
+      if (a) g.no.push(`<button class="chip no off" data-pick="${m.id}" data-n="${esc(n)}" title="${(KIND[a.kind]||KIND.other)[1]}">${(KIND[a.kind]||KIND.other)[0]} ${chipName(n)}</button>`);
+      else g.none.push(`<button class="chip" data-pick="${m.id}" data-n="${esc(n)}">${chipName(n)}</button>`);
+    }
+  }
+  const grp = (t, list) => list.length ? `<div class="grp"><span>${t} · ${list.length}</span><div class="chips">${list.join('')}</div></div>` : '';
+  // Main positions of the people who said yes: GK 1 · DEF 3 ...
+  const inPos = {}; for (const n of Object.keys(av).filter(n => av[n]==='yes')){ const k = posList(LIVE.players.find(p => p.name===n))[0] || '?'; inPos[k] = (inPos[k]||0) + 1; }
+  const posLine = Object.keys(inPos).length ? ` (${[...Object.keys(POS), '?'].filter(k => inPos[k]).map(k => `${k} ${inPos[k]}`).join(' · ')})` : '';
+  const where = m.home===true ? 'Home' : m.home===false ? 'Away' : '';
+  return `<div class="card match"><div class="card-top"><div>
+      <div class="muted">${WDL[wday(m.match_date)]} ${fmt(m.match_date)} ${m.match_date.slice(0,4)}${m.kickoff ? ' · '+esc(m.kickoff) : ''}</div>
+      <h3>vs ${esc(m.opponent)}</h3></div>
+      <span><button class="btn sm" data-match-edit="${m.id}">Edit</button></span></div>
+    <div class="meta">${[m.competition, where, m.place].filter(Boolean).map(x => `<span class="tag travel">${esc(x)}</span>`).join('')}</div>
+    ${m.note ? `<p class="muted" style="margin:0 0 6px">${esc(m.note)}</p>` : ''}
+    ${grp('✅ In' + posLine, g.yes)}${grp('🤔 Maybe', g.maybe)}${grp('❌ Out', g.no)}${grp('No answer yet', g.none)}
+    <div class="answer"><select data-sel="${m.id}" aria-label="Player"><option value="">who?</option>${opts(ME)}</select>
+      <button class="btn sm" data-av="yes" data-m="${m.id}">✅ In</button><button class="btn sm" data-av="maybe" data-m="${m.id}">🤔 Maybe</button>
+      <button class="btn sm" data-av="no" data-m="${m.id}">❌ Out</button><button class="btn sm" data-av="" data-m="${m.id}">Clear</button></div></div>`;
+}
+
+const cancel = `<button type="button" class="btn" onclick="dlg.close()">Cancel</button>`;
+function awayForm(who, from){
+  $('#sheet').innerHTML = `<button class="close" onclick="dlg.close()" aria-label="Close">×</button><h3>Add away time</h3>
+    <form class="form" id="af">
+      <label class="full">Who<select name="player" required><option value="">pick a name</option>${opts(who || ME)}</select></label>
+      <label>Why<select name="kind"><option value="travel">✈️ Travel</option><option value="injury">🩹 Injured</option><option value="sick">🤒 Sick</option><option value="other">📌 Other</option></select></label>
+      <label>Note (no medical details)<input name="note" maxlength="60" placeholder="e.g. Colombia"></label>
+      <label>From<input type="date" name="start" required value="${from || TODAY}"></label>
+      <label>Back on (empty = not sure)<input type="date" name="end"></label>
+      <div class="acts">${cancel}<button class="btn main">Save</button></div></form>`;
+  dlg.showModal();
+}
+
+function matchForm(m){
+  m = m || {};
+  const sel = (v, x) => v===x ? 'selected' : '';
+  const comp = ['Liga','Pokal','Friendly','Tournament'];
+  $('#sheet').innerHTML = `<button class="close" onclick="dlg.close()" aria-label="Close">×</button><h3>${m.id ? 'Edit match' : 'Add match'}</h3>
+    <form class="form" id="mf" data-id="${m.id || ''}">
+      <label class="full">Opponent<input name="opponent" required maxlength="60" value="${esc(m.opponent || '')}"></label>
+      <label>Date<input type="date" name="date" required value="${m.match_date || ''}"></label>
+      <label>Kick-off<input type="time" name="kickoff" value="${esc(m.kickoff || '')}"></label>
+      <label>Competition<select name="competition"><option value=""></option>${comp.map(c => `<option ${sel(m.competition,c)}>${c}</option>`).join('')}</select></label>
+      <label>Home or away<select name="home"><option value=""></option><option value="true" ${sel(m.home,true)}>Home</option><option value="false" ${sel(m.home,false)}>Away</option></select></label>
+      <label class="full">Place<input name="place" maxlength="80" value="${esc(m.place || '')}"></label>
+      <label class="full">Note<input name="note" maxlength="200" value="${esc(m.note || '')}"></label>
+      <div class="acts">${m.id ? `<button type="button" class="btn" data-match-del="${m.id}" style="margin-right:auto">Delete match</button>` : ''}${cancel}<button class="btn main">Save</button></div></form>`;
+  dlg.showModal();
+}
+
+function playerForm(){
+  $('#sheet').innerHTML = `<button class="close" onclick="dlg.close()" aria-label="Close">×</button><h3>Add player</h3>
+    <form class="form" id="nf"><label class="full">Name (as on the lists)<input name="name" required maxlength="40"></label>
+    <div class="acts">${cancel}<button class="btn main">Add</button></div></form>`;
+  dlg.showModal();
+}
+
+function profileHTML(name){
+  const p = LIVE.players.find(x => x.name===name);
+  if (!p) return MODE==='live' ? `<button class="btn sm" data-add-player="${esc(name)}">+ Add ${esc(name)} to the players</button>` : '';
+  const sel = (v, x) => v===x ? 'selected' : '';
+  return `<form class="form" id="pf" data-name="${esc(name)}" style="border-top:1px solid var(--line);padding-top:12px">
+    <label class="full">Nicknames (comma between them)<input name="nickname" maxlength="150" placeholder="e.g. Nacho, El Flaco" value="${esc(p.nickname)}"></label>
+    <label class="full">Full name<input name="full_name" maxlength="80" value="${esc(p.full_name || '')}"></label>
+    <label>Shirt number<input name="number" type="number" min="0" max="99" value="${p.number ?? ''}"></label>
+    <label>Main position<select name="main"><option value="">not set</option>${Object.entries(POS).map(([k,v]) => `<option value="${k}" ${sel(posList(p)[0],k)}>${v}</option>`).join('')}</select></label>
+    <label class="full">Also plays<span class="poschk">${Object.entries(POS).map(([k,v]) => `<label><input type="checkbox" name="also" value="${k}" ${posList(p).slice(1).includes(k)?'checked':''}> ${v}</label>`).join('')}</span></label>
+    <label>Foot<select name="foot"><option value=""></option><option value="R" ${sel(p.foot,'R')}>Right</option><option value="L" ${sel(p.foot,'L')}>Left</option><option value="both" ${sel(p.foot,'both')}>Both</option></select></label>
+    <label>Role<select name="role"><option value="player" ${sel(p.role,'player')}>Player</option><option value="coach" ${sel(p.role,'coach')}>Coach (does not play)</option></select></label>
+    <label class="chk full"><input type="checkbox" name="active" ${p.active?'checked':''}> Active: shows in matches and the calendar. Untick if they left or stopped coming.</label>
+    <div class="acts"><button type="button" class="btn" data-act="away-new" data-for="${esc(name)}">+ Away time</button><button class="btn main">Save profile</button></div></form>`;
+}
+
+function inPeriod(d){ return d >= period.from && d <= period.to && d <= TODAY; }
+
+function absDays(a){
+  const s = a.start < period.from ? period.from : a.start;
+  let e = a.end || (a.start > TODAY ? a.start : null);
+  if (!e) e = new Date(new Date(a.start).getTime() + 21*864e5).toISOString().slice(0,10); // unknown end: count 3 weeks
+  if (e > TODAY) e = TODAY;
+  if (e > period.to) e = period.to;
+  return Math.max(0, daysBetween(s, e) + 1);
+}
+
+function compute(){
+  const ev = EVENTS.filter(e => inPeriod(e.date));
+  const P = {};
+  const get = n => P[n] ||= {name:n, tr:0, mt:0, late:0, doubt:0, drop:0, balls:0, bibs:0, opened:0, posSum:0, posN:0, first:null, travel:0, injury:0, chat:0};
+  const trainings = ev.filter(e => e.kind==='training');
+  for (const e of ev){
+    get(e.opened_by).opened++;
+    for (const p of e.players){
+      const s = get(p.player);
+      if (e.kind==='training') s.tr++; else s.mt++;
+      if (p.late) s.late++;
+      if (p.doubt) s.doubt++;
+      if (p.balls) s.balls++;
+      if (p.bibs) s.bibs++;
+      if (p.player !== e.opened_by){ s.posSum += p.pos; s.posN++; }
+      if (!s.first || e.date < s.first) s.first = e.date;
+    }
+    for (const d of e.dropped) get(d).drop++;
+  }
+  for (const s of Object.values(P)){
+    const possible = s.first ? trainings.filter(t => t.date >= s.first).length : 0;
+    s.rate = possible >= 6 ? s.tr / possible : null;
+    s.avgPos = s.posN >= 8 ? s.posSum / s.posN : null;
+  }
+  for (const a of ABS){
+    if (!a.start || (a.end || a.start) < period.from || a.start > period.to || a.start > TODAY) continue;
+    const s = get(a.player);
+    if (a.kind==='travel') s.travel += absDays(a); else if (a.kind!=='other') s.injury += absDays(a);
+  }
+  const m0 = period.from.slice(0,7), m1 = period.to.slice(0,7), mNow = TODAY.slice(0,7);
+  for (const [n, months] of Object.entries(CHAT)){
+    for (const [mo, c] of Object.entries(months)){
+      if (mo < m0 || mo > m1 || mo > mNow) continue;
+      const s = get(n);
+      for (const k of ['msgs','cheer','laugh','bday','media','sticker','night']) s[k] = (s[k]||0) + (c[k]||0);
+      s.balls += c.balls_msg || 0;
+      s.bibs += c.bibs_msg || 0;
+    }
+  }
+  // Hide one-off guests: keep people with 3+ lists, any absence, or 20+ messages
+  const players = Object.values(P).filter(s => s.tr + s.mt >= 3 || s.travel || s.injury || s.opened || (s.msgs||0) >= 20);
+  return {ev, trainings, players, P};
+}
+
+// rel: high / mid / low = which section. trust: hi / mid / lo. why: the bias in one line.
+const BOARDS = [
+  {rel:'high', trust:'mid', t:'Most trainings', e:'🏃', sub:'On the final training list', why:'A list is a plan: people who cancel by message still count.', v:s=>s.tr},
+  {rel:'high', trust:'mid', t:'Most matches', e:'⚽', sub:'Signed up for a league or cup game', why:'Signed up is not the same as picked in the 16.', v:s=>s.mt},
+  {rel:'high', trust:'lo', t:'Last-minute dropouts', e:'🚪', sub:'Was on a list, then not on the final one', why:'Copy-paste accidents look the same as real drop-outs.', v:s=>s.drop},
+  {rel:'mid', trust:'hi', t:'Early bird', e:'🐣', sub:'Average spot on the list (lower is faster)', v:s=>s.avgPos, asc:true, f:v=>'#'+v.toFixed(1)},
+  {rel:'mid', trust:'lo', t:'Warned they\'d be late', e:'⏰', sub:'Wrote "late" next to their name', why:'Only counts the honest ones. 20 marks on lists, 311 "late" in the chat.', v:s=>s.late},
+  {rel:'high', trust:'lo', t:'Ball carrier', e:'🎒', sub:'⚽ next to their name, or wrote "I have the balls"', why:'Most carriers never say it: balls show on only 33 of 96 lists.', v:s=>s.balls},
+  {rel:'high', trust:'lo', t:'Bib hero', e:'🦺', sub:'🦺 next to their name, or wrote "I have the bibs / petos"', why:'Most carriers never say it: bibs show on only 19 of 96 lists.', v:s=>s.bibs},
+  {rel:'mid', trust:'lo', t:'Globetrotter', e:'✈️', sub:'Days away travelling', why:'Only trips people announced. Unknown end = 3 weeks.', v:s=>s.travel, f:v=>v+' d'},
+  {rel:'mid', trust:'lo', t:'In the infirmary', e:'🩹', sub:'Days out injured or sick', why:'Only what people announced. Unknown end = 3 weeks.', v:s=>s.injury, f:v=>v+' d'},
+  {rel:'mid', trust:'mid', t:'The "dif" kings', e:'🤔', sub:'Signed with dif / maybe / tbc', why:'Doubt is written in many ways; some are missed.', v:s=>s.doubt},
+  {rel:'chat', trust:'hi', t:'El más hablador', e:'🗣️', sub:'Messages in the group', v:s=>s.msgs},
+  {rel:'chat', trust:'mid', t:'Hype man', e:'📣', sub:'Messages with vamos, dale, crack, bravo, 💪, 🔥, 👏', why:'Found by keywords: some cheers are missed, some jokes count.', v:s=>s.cheer},
+  {rel:'chat', trust:'mid', t:'Birthday wisher', e:'🎂', sub:'Wrote happy birthday / feliz cumple', why:'Found by keywords.', v:s=>s.bday},
+  {rel:'chat', trust:'mid', t:'Best audience', e:'😂', sub:'Laughs: jaja, haha, 😂', why:'Counts who laughs, not who is funny.', v:s=>s.laugh},
+  {rel:'chat', trust:'hi', t:'Photographer', e:'📸', sub:'Photos, videos and GIFs sent', v:s=>s.media},
+  {rel:'chat', trust:'hi', t:'Sticker spammer', e:'🃏', sub:'Stickers sent', v:s=>s.sticker},
+  {rel:'chat', trust:'hi', t:'Night owl', e:'🦉', sub:'Messages between midnight and 5 am', v:s=>s.night},
+];
+
+let open = {};
+function boardHTML(b, players, i){
+  const rows = players.filter(s => { const v=b.v(s); return v!=null && v>0; })
+    .sort((x,y) => b.asc ? b.v(x)-b.v(y) : b.v(y)-b.v(x));
+  if (!rows.length) return '';
+  const max = Math.max(...rows.map(b.v)), min = Math.min(...rows.map(b.v));
+  const shown = open[i] ? rows : rows.slice(0,5);
+  const f = b.f || (v=>v);
+  return `<div class="card"><div class="card-top"><h3>${b.e} ${b.t}</h3>${pill(b.trust)}</div><div class="sub">${b.sub}</div>
+    ${b.why ? `<p class="why ${b.trust==='mid'?'mid':''}">${b.why}</p>` : '<p class="why"></p>'}
+    ${shown.map((s,k) => { const w = b.asc ? (max===min?100:100*(max-b.v(s))/(max-min)*0.8+20) : 100*b.v(s)/max;
+      return `<div class="row" tabindex="0" data-p="${esc(s.name)}"><span class="n">${k+1}</span><div class="who">${esc(s.name)}<div class="bar" style="width:${w}%"></div></div><span class="v">${f(b.v(s))}</span></div>`; }).join('')}
+    ${rows.length>5 ? `<button class="more" data-b="${i}">${open[i]?'Show less':`Show all ${rows.length}`}</button>`:''}</div>`;
+}
+
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.id===period.id));
+  const {ev, trainings, players} = compute();
+  const matches = ev.filter(e => e.kind==='match');
+  const avg = trainings.length ? Math.round(trainings.reduce((a,e)=>a+e.players.length,0)/trainings.length) : 0;
+  const reposts = ev.reduce((a,e)=>a+e.reposts,0);
+  const seen = new Set(ev.flatMap(e => e.players.map(p => p.player)));
+  $('#season-note').textContent = period.id==='s27'
+    ? 'Season 26/27 · started 1 August 2026 (pre-season) · up to ' + fmt(TODAY)
+    : 'All time · since the first list in the export, ' + (EVENTS[0] ? fmt(EVENTS[0].date) + ' ' + EVENTS[0].date.slice(0,4) : '');
+  $('#kpis').innerHTML = [
+    [trainings.length,'trainings'],[matches.length,'matches'],[seen.size,'different names on lists'],[reposts.toLocaleString('en'),'list copy-pastes']
+  ].map(([b,s])=>`<div class="kpi"><b>${b}</b><span>${s}</span></div>`).join('');
+  renderTrainings(trainings);
+  renderTeam();
+
+  for (const rel of ['high','mid','chat']){
+    let html = BOARDS.map((b,i) => (b.rel!==rel || (b.only && b.only!==period.id)) ? '' : boardHTML(b, players, i)).join('');
+    if (rel==='high') html += `<div class="card soon"><div class="card-top"><h3>💶 Who owes money</h3>${pill('none')}</div><div class="sub">Coming soon</div><p class="why">Payments go by bank transfer. The chat does not show who paid.</p></div>`;
+    $('#b-'+rel).innerHTML = html;
+  }
+
+  $('#recent').innerHTML = ev.slice(-8).reverse().map(e => `<div class="ev"><span>${fmt(e.date)} · ${esc(e.title.replace(/\s+/g,' ').slice(0,40))}</span>
+    <span class="muted">${e.players.length} in${e.dropped.length?` · ${e.dropped.length} left`:''}</span></div>`).join('') || '<span class="muted">No lists in this period yet.</span>';
+}
+
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const wday = d => new Date(d+'T12:00').getDay();
+const mean = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : 0;
+
+function renderTrainings(tr){
+  if (!tr.length){ $('#tstats').innerHTML=''; $('#tchart').innerHTML='<span class="muted">No trainings in this period yet.</span>'; return; }
+  const n = tr.map(t => t.players.length);
+  const sorted = [...n].sort((a,b)=>a-b);
+  const median = sorted.length%2 ? sorted[(sorted.length-1)/2] : (sorted[sorted.length/2-1]+sorted[sorted.length/2])/2;
+  const maxT = tr.reduce((a,t)=>t.players.length>a.players.length?t:a), minT = tr.reduce((a,t)=>t.players.length<a.players.length?t:a);
+  const byDay = d => tr.filter(t => wday(t.date)===d).map(t => t.players.length);
+  const tue = byDay(2), thu = byDay(4);
+  const weeks = Math.max(1, Math.round(daysBetween(tr[0].date, tr.at(-1).date)/7) + 1);
+  const people = new Set(tr.flatMap(t => t.players.map(p => p.player))).size;
+  const one = v => (Math.round(v*10)/10).toString();
+  $('#tstats').innerHTML = [
+    [tr.length, 'trainings done'],
+    [one(mean(n)), 'players per training (avg)'],
+    [median, 'median players'],
+    [people, 'different players came'],
+    [maxT.players.length, 'busiest · ' + fmt(maxT.date)],
+    [minT.players.length, 'quietest · ' + fmt(minT.date)],
+    [tue.length ? one(mean(tue)) : '–', `Tuesday avg (${tue.length} trainings)`],
+    [thu.length ? one(mean(thu)) : '–', `Thursday avg (${thu.length} trainings)`],
+  ].map(([b,s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+
+  // Bar chart: one bar per training, dashed line = average.
+  const W = 640, H = 210, L = 28, R = 8, T = 12, B = 26;
+  const top = Math.max(5, Math.ceil(Math.max(...n)/5)*5);
+  const y = v => T + (H-T-B) * (1 - v/top);
+  const band = (W-L-R)/tr.length, gap = Math.min(2, band*0.25), bw = Math.max(1, band-gap);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Players per training, ${tr.length} trainings">`;
+  for (let v = 0; v <= top; v += 5) s += `<line class="grid-l" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${v}</text>`;
+  let lastMonth = '';
+  tr.forEach((t,i) => {
+    const x = L + i*band + gap/2, v = t.players.length, h = H-B-y(v), r = Math.min(4, bw/2, h);
+    const mo = t.date.slice(0,7);
+    if (mo !== lastMonth){ lastMonth = mo; s += `<text x="${x}" y="${H-8}">${new Date(t.date+'T12:00').toLocaleDateString('en-GB',{month:'short'})}</text>`; }
+    // rounded top, square base
+    s += `<rect class="hit" data-i="${i}" x="${L+i*band}" y="${T}" width="${band}" height="${H-T-B}"/>`;
+    s += `<path class="bar-m" d="M${x},${H-B} V${y(v)+r} Q${x},${y(v)} ${x+r},${y(v)} H${x+bw-r} Q${x+bw},${y(v)} ${x+bw},${y(v)+r} V${H-B} Z"/>`;
+  });
+  const av = mean(n);
+  s += `<line class="avg-l" x1="${L}" x2="${W-R}" y1="${y(av)}" y2="${y(av)}"/><text x="${W-R}" y="${y(av)-5}" text-anchor="end">avg ${one(av)}</text></svg>`;
+  $('#tchart').innerHTML = s + '<div class="tip" id="tip" hidden></div>';
+  const box = $('#tchart'), tip = $('#tip');
+  box.onmousemove = e => {
+    const h = e.target.closest('.hit'); if (!h){ tip.hidden = true; return; }
+    const t = tr[+h.dataset.i], rb = box.getBoundingClientRect(), rh = h.getBoundingClientRect();
+    tip.textContent = `${WD[wday(t.date)]} ${fmt(t.date)} · ${t.players.length} players`;
+    tip.style.left = (rh.left - rb.left + box.scrollLeft + rh.width/2) + 'px';
+    tip.style.top = (rh.top - rb.top + 10) + 'px';
+    tip.hidden = false;
+  };
+  box.onmouseleave = () => { tip.hidden = true; };
+}
+
+function sheet(name){
+  const {trainings, P} = compute();
+  const s = P[name] || {name, tr:0, mt:0, late:0, drop:0, balls:0, bibs:0, travel:0, injury:0, rate:null};
+  const last = trainings.slice(-30);
+  const myAbs = ABS.filter(a => a.player===name);
+  const away = d => myAbs.some(a => a.start<=d && (a.end||a.start)>=d);
+  const pr = LIVE.players.find(x => x.name===name);
+  const FOOT = {R:'right foot', L:'left foot', both:'both feet'};
+  const line = pr ? [pr.number!=null ? '#'+pr.number : '', FOOT[pr.foot], pr.role==='coach' ? 'coach' : '', pr.active ? '' : 'not active', LAST[name] ? 'last list '+fmt(LAST[name]) : ''].filter(Boolean).join(' · ') : '';
+  $('#sheet').innerHTML = `<button class="close" onclick="dlg.close()" aria-label="Close">×</button><h3>${esc(name)}</h3>
+    ${pr && (nicks(pr).length || pr.full_name) ? `<div class="aka">${[nicks(pr).length ? 'aka '+nicks(pr).join(', ') : '', pr.full_name].filter(Boolean).map(esc).join(' · ')}</div>` : ''}
+    ${pr ? `<div class="big-pos">${posText(pr) ? esc(posText(pr)) : '<span class="muted">Position not set yet</span>'}</div>` : ''}
+    ${line ? `<div>${esc(line)}</div>` : ''}
+    <div class="muted">Stats: ${period.label}</div>
+    <div class="stats">
+      <div><b>${s.tr}</b><span>trainings</span></div><div><b>${s.mt}</b><span>matches</span></div>
+      <div><b>${s.rate!=null?Math.round(s.rate*100)+'%':'–'}</b><span>attendance</span></div>
+      <div><b>${s.late}</b><span>warned late</span></div><div><b>${s.drop}</b><span>dropouts</span></div>
+      <div><b>${s.balls+s.bibs}</b><span>brought gear</span></div>
+    </div>
+    <div class="muted">Last ${last.length} trainings (green = on the list, blue = away)</div>
+    <div class="dots">${last.map(t => { const y=t.players.some(p=>p.player===name); return `<i class="${y?'y':away(t.date)?'a':''}" title="${t.date}"></i>`; }).join('')}</div>
+    ${myAbs.length ? '<div class="muted">Away / injured</div>' + myAbs.slice(-6).reverse().map(a => `<div class="ev"><span>${(KIND[a.kind]||KIND.other)[0]} ${esc(showNote(a) ? a.note : (KIND[a.kind]||KIND.other)[1])}</span><span class="muted">${fmt(a.start)} – ${a.end?fmt(a.end):'?'}</span></div>`).join('') : ''}
+    ${profileHTML(name)}`;
+  if (!dlg.open) dlg.showModal();
+}
+
+document.addEventListener('click', async e => {
+  const t = e.target.closest('button, [data-p], td[data-cd]'); if (!t) return;
+  const d = t.dataset;
+  if (d.cd) return awayForm(d.cp, d.cd);
+  if (t.classList.contains('more')){ open[d.b] = !open[d.b]; render(); return; }
+  if (d.act==='away-new') return awayForm(d.for);
+  if ('cal' in d){ calStart = +d.cal ? addDays(calStart, 28 * +d.cal) : mondayOf(TODAY); renderCal(); return; }
+  if ('allMatches' in d){ allMatches = !allMatches; renderTeam(); return; }
+  if ('showOff' in d){ showOff = !showOff; renderTeam(); return; }
+  if (d.act==='match-new') return matchForm();
+  if (d.act==='player-new') return playerForm();
+  if (d.matchEdit) return matchForm(LIVE.matches.find(m => m.id==d.matchEdit));
+  if (d.matchDel){ if (confirm('Delete this match and its answers?') && await save({action:'match_delete', id:+d.matchDel})) dlg.close(); return; }
+  if (d.awayDel){ const a = LIVE.away.find(x => x.id==d.awayDel); if (a && confirm(`Remove ${a.player}'s line?`)) save({action:'away_delete', id:a.id}); return; }
+  if (d.pick){ const s = document.querySelector(`[data-sel="${d.pick}"]`); if (s){ s.value = d.n; s.focus(); } return; }
+  if ('av' in d){
+    const who = document.querySelector(`[data-sel="${d.m}"]`).value;
+    if (!who){ alert('Pick a name first (tap it in the list).'); return; }
+    return save({action:'avail', match_id:+d.m, player:who, status:d.av});
+  }
+  if (d.addPlayer){ if (await save({action:'player', name:d.addPlayer})) sheet(d.addPlayer); return; }
+  if (d.p) sheet(d.p);
+});
+
+document.addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = e.target, v = Object.fromEntries(new FormData(f));
+  if (f.id==='gate-form'){ PASS = $('#pass').value.trim(); LS.set('pichanga-pass', PASS); return load(); }
+  if (f.id==='stale'){
+    const ns = new FormData(f).getAll('n');
+    if (ns.length && confirm(`Mark ${ns.length} people as not active?`)) save({action:'players_active', names:ns, active:false});
+    return;
+  }
+  if (f.id==='af'){
+    if (v.end && v.end < v.start){ alert('"Back on" is before "From".'); return; }
+    if (await save({action:'away_add', ...v})) dlg.close();
+  }
+  if (f.id==='mf'){
+    const body = {...v, action: f.dataset.id ? 'match_edit' : 'match_add'};
+    if (f.dataset.id) body.id = +f.dataset.id;
+    if (await save(body)) dlg.close();
+  }
+  if (f.id==='nf'){
+    const n = v.name.trim(), old = LIVE.players.find(p => coll(p.name, n)===0);
+    if (old) return sheet(old.name);   // already there: never overwrite a profile
+    if (await save({action:'player', name:n})) sheet(n);
+  }
+  if (f.id==='pf'){
+    const n = f.dataset.name, fd = new FormData(f);
+    const position = [v.main, ...fd.getAll('also').filter(x => x !== v.main)].filter(Boolean).join(' ');
+    const {main, also, ...rest} = v;
+    if (await save({action:'player', name:n, ...rest, position, active: !!v.active})) sheet(n);
+  }
+});
+document.addEventListener('keydown', e => { if (e.key==='Enter'){ const r = e.target.closest?.('.row[data-p]'); if (r) sheet(r.dataset.p); } });
+dlg.addEventListener('click', e => { if (e.target===dlg) dlg.close(); });
+load();
+</script>
